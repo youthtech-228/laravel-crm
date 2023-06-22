@@ -31,6 +31,7 @@
 
     <!-- Scripts -->
     <script type="module" src="{{ asset('js/app.js') }}" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
 </body>
 
 </html>

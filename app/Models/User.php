@@ -45,6 +45,28 @@ class User extends Authenticatable implements HasMedia, MustVerifyEmail
         'password', 'remember_token',
     ];
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'first_name',
+        'last_name',
+        'username',
+        'email',
+        'mobile',
+        'gender',
+        'client',
+        'date_of_birth',
+        'email_verified_at',
+        'avatar',
+        'status',
+        'password',
+        
+    ];
+
     protected static function boot()
     {
         parent::boot();

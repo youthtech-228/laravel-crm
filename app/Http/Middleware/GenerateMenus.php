@@ -53,7 +53,7 @@ class GenerateMenus
                 ]);
 
             // Settings
-            $menu->add('<i class="nav-icon fas fa-cogs"></i> Settings', [
+           /*  $menu->add('<i class="nav-icon fas fa-cogs"></i> Settings', [
                 'route' => 'backend.settings',
                 'class' => 'nav-item',
             ])
@@ -64,10 +64,10 @@ class GenerateMenus
                 ])
                 ->link->attr([
                     'class' => 'nav-link',
-                ]);
+                ]); */
 
             // Backup
-            $menu->add('<i class="nav-icon fas fa-archive"></i> Backups', [
+            /* $menu->add('<i class="nav-icon fas fa-archive"></i> Backups', [
                 'route' => 'backend.backups.index',
                 'class' => 'nav-item',
             ])
@@ -78,7 +78,7 @@ class GenerateMenus
                 ])
                 ->link->attr([
                     'class' => 'nav-link',
-                ]);
+                ]); */
 
             // Access Control Dropdown
             $accessControl = $menu->add('<i class="nav-icon fa-solid fa-user-gear"></i> Access Control', [
@@ -127,7 +127,7 @@ class GenerateMenus
 
             // Log Viewer
             // Log Viewer Dropdown
-            $accessControl = $menu->add('<i class="nav-icon fa-solid fa-list-check"></i> Log Viewer', [
+            /* $accessControl = $menu->add('<i class="nav-icon fa-solid fa-list-check"></i> Log Viewer', [
                 'class' => 'nav-group',
             ])
                 ->data([
@@ -166,7 +166,7 @@ class GenerateMenus
                 ])
                 ->link->attr([
                     'class' => 'nav-link',
-                ]);
+                ]); */
 
             // Access Permission Check
             $menu->filter(function ($item) {

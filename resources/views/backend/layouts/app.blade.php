@@ -21,10 +21,20 @@
 
     <script src="{{ asset('vendor/jquery/jquery-3.6.4.min.js') }}"></script>
 
-    @vite(['resources/sass/app-backend.scss', 'resources/js/app-backend.js'])
+    <script src="{{ asset('js/backend.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js" integrity="sha512-VEd+nq25CkR676O+pLBnDW09R7VQX9Mdiij052gVCp5yVH3jGtH70Ho/UUv4mJDsEdTvqRCFZg0NKGiojGnUCw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    {{-- <script src="/js/Toast.min.js"></script>
+    <link href="/css/Toast.min.css" rel="stylesheet" /> --}}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 
+    {{-- @vite(['resources/sass/app-backend.scss', 'resources/js/app-backend.js']) --}}
+    @vite(['resources/sass/app-backend.scss'])
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css?family=Ubuntu&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css?family=Noto+Sans+Bengali+UI&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.css" integrity="sha512-3pIirOrwegjM6erE5gPSwkUzO+3cTjpnV9lexlNZqvupR64iZBnOOTiiLPb9M36zpMScbmUNIcHUqKD47M719g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         body {
             font-family: Ubuntu, "Noto Sans Bengali UI", Arial, Helvetica, sans-serif
@@ -73,7 +83,8 @@
 
     <!-- Scripts -->
     @livewireScripts
-    
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.js"></script>
+    <script src="/js/custom.js"></script>
     @stack('after-scripts')
     <!-- / Scripts -->
 

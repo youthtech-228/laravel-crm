@@ -19,14 +19,14 @@
         <x-backend.section-header>
             <i class="{{ $module_icon }}"></i> {{ __($module_title) }} <small class="text-muted">{{ __($module_action) }}</small>
 
-            <x-slot name="subtitle">
+            {{-- <x-slot name="subtitle">
                 @lang(":module_name Management Dashboard", ['module_name'=>Str::title($module_name)])
-            </x-slot>
+            </x-slot> --}}
             <x-slot name="toolbar">
                 <x-backend.buttons.return-back />
-                <a href="{{ route("backend.users.index") }}" class="btn btn-primary" data-toggle="tooltip" title="List"><i class="fas fa-list"></i> List</a>
-                <a href="{{ route('backend.users.profile', $user->id) }}" class="btn btn-primary" data-toggle="tooltip" title="Profile"><i class="fas fa-user"></i> Profile</a>
-                <x-buttons.edit route='{!!route("backend.$module_name.edit", $$module_name_singular)!!}' title="{{__('Edit')}} {{ ucwords(Str::singular($module_name)) }}" class="ms-1" />
+                {{-- <a href="{{ route("backend.users.index") }}" class="btn btn-primary" data-toggle="tooltip" title="List"><i class="fas fa-list"></i> List</a> --}}
+                {{-- <a href="{{ route('backend.users.profile', $user->id) }}" class="btn btn-primary" data-toggle="tooltip" title="Profile"><i class="fas fa-user"></i> Profile</a> --}}
+                <x-buttons.edit route='{!!route("backend.$module_name.edit", $$module_name_singular)!!}' title="{{__('Edit')}} {{ ucwords(Str::singular($module_name)) }}" class="ms-1">{{__('Edit')}}</x-buttons.edit>
             </x-slot>
         </x-backend.section-header>
 
@@ -133,21 +133,60 @@
                 <!--/table-responsive-->
 
                 <hr>
-
-                @if ($user->status != 2)
-                <a href="{{route('backend.users.block', $user)}}" class="btn btn-danger mt-1" data-method="PATCH" data-token="{{csrf_token()}}" data-toggle="tooltip" title="{{__('labels.backend.block')}}" data-confirm="Are you sure?"><i class="fas fa-ban"></i> Block</a>
-                @endif
-                @if ($user->status == 2)
-                <a href="{{route('backend.users.unblock', $user)}}" class="btn btn-info mt-1" data-method="PATCH" data-token="{{csrf_token()}}" data-toggle="tooltip" title="{{__('labels.backend.unblock')}}" data-confirm="Are you sure?"><i class="fas fa-check"></i> Unblock</a>
-                @endif
-                <a href="{{route('backend.users.destroy', $user)}}" class="btn btn-danger mt-1" data-method="DELETE" data-token="{{csrf_token()}}" data-toggle="tooltip" title="{{__('labels.backend.delete')}}" data-confirm="Are you sure?"><i class="fas fa-trash-alt"></i> Delete</a>
-                @if ($user->email_verified_at == null)
-                <a href="{{route('backend.users.emailConfirmationResend', $user->id)}}" class="btn btn-primary mt-1" data-toggle="tooltip" title="Send Confirmation Email"><i class="fas fa-envelope"></i> Email Confirmation</a>
-                @endif
+                <div class="d-flex align-items-center justify-content-end">
+                    @if ($user->status != 2)
+                    <button
+                        class="btn btn-danger me-1 btn-user-block"
+                        data-url="{{route('backend.users.block', $user)}}"
+                        data-method="POST"
+                        data-token="{{csrf_token()}}"
+                        data-toggle="tooltip"
+                        title="{{__('labels.backend.block')}}"
+                        data-confirm="Are you sure?"
+                    >
+                        <i class="fas fa-ban"></i> Block
+                    </button>
+                    @endif
+                    @if ($user->status == 2)
+                    <button
+                        class="btn btn-info me-1 btn-user-unblock"
+                        data-url="{{route('backend.users.unblock', $user)}}"
+                        data-method="POST"
+                        data-token="{{csrf_token()}}"
+                        data-toggle="tooltip"
+                        title="{{__('labels.backend.unblock')}}"
+                        data-confirm="Are you sure?"
+                    >
+                        <i class="fas fa-check"></i> Unblock
+                    </button>
+                    @endif
+                    <button
+                        data-url="{{route('backend.users.destroy', $user)}}"
+                        data-redirect-url="{{route('backend.users.index')}}"
+                        class="btn btn-danger me-1 btn-user-delete"
+                        data-method="DELETE"
+                        data-token="{{csrf_token()}}"
+                        data-toggle="tooltip"
+                        title="{{__('labels.backend.delete')}}"
+                        data-confirm="Are you sure?"
+                    >
+                        <i class="fas fa-trash-alt"></i> Delete
+                </button>
+                    @if ($user->email_verified_at == null)
+                    <a
+                        href="{{route('backend.users.emailConfirmationResend', $user->id)}}"
+                        class="btn btn-primary me-1"
+                        data-toggle="tooltip"
+                        title="Send Confirmation Email"
+                    >
+                        <i class="fas fa-envelope"></i> Email Confirmation
+                    </a>
+                    @endif
+                </div>
             </div>
             <!--/col-->
 
-            <div class="col">
+            <div class="col d-none">
                 <h4>
                     User Profile
                 </h4>
@@ -197,6 +236,23 @@
                     Updated: {{$user->updated_at->diffForHumans()}},
                     Created at: {{$user->created_at->isoFormat('LLLL')}}
                 </small>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="userBlockDeleteModal" tabindex="-1" aria-labelledby="userBlockDeleteModalTitle" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userBlockDeleteModalTitle">Attention!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalBodyText">
+                Are you sure you want to delete the current user?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmUserBlockDelete">Confirm</button>
             </div>
         </div>
     </div>

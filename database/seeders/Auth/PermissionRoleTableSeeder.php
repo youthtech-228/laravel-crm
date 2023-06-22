@@ -25,8 +25,7 @@ class PermissionRoleTableSeeder extends Seeder
         // Create Roles
         $super_admin = Role::create(['name' => 'super admin']);
         $admin = Role::create(['name' => 'administrator']);
-        $manager = Role::create(['name' => 'manager']);
-        $executive = Role::create(['name' => 'executive']);
+        $client = Role::create(['name' => 'client']);
         $user = Role::create(['name' => 'user']);
 
         // Create Permissions
@@ -40,7 +39,7 @@ class PermissionRoleTableSeeder extends Seeder
             Permission::firstOrCreate(['name' => $perms]);
         }
 
-        Artisan::call('auth:permission', [
+        /* Artisan::call('auth:permission', [
             'name' => 'posts',
         ]);
         echo "\n _Posts_ Permissions Created.";
@@ -60,12 +59,18 @@ class PermissionRoleTableSeeder extends Seeder
         ]);
         echo "\n _Comments_ Permissions Created.";
 
-        echo "\n\n";
+        echo "\n\n"; */
 
         // Assign Permissions to Roles
         $admin->givePermissionTo(Permission::all());
-        $manager->givePermissionTo('view_backend');
-        $executive->givePermissionTo('view_backend');
+        $client->givePermissionTo('view_backend');
+        $client->givePermissionTo('view_users');
+        $client->givePermissionTo('add_users');
+        $client->givePermissionTo('edit_users');
+        $client->givePermissionTo('delete_users');
+        $client->givePermissionTo('restore_users');
+        $client->givePermissionTo('block_users');
+        $user->givePermissionTo('view_backend');
 
         Schema::enableForeignKeyConstraints();
     }

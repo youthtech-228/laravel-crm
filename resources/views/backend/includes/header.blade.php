@@ -41,7 +41,7 @@ $notifications_latest = optional($notifications)->take(5);
         </ul>
 
         <ul class="header-nav ms-3">
-            <li class="nav-item dropdown">
+            {{-- <li class="nav-item dropdown">
                 <a class="nav-link" data-coreui-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">
                     <i class="fa-solid fa-language"></i>&nbsp; {{strtoupper(App::getLocale())}}
                 </a>
@@ -55,7 +55,7 @@ $notifications_latest = optional($notifications)->take(5);
                     </a>
                     @endforeach
                 </div>
-            </li>
+            </li> --}}
 
             <li class="nav-item dropdown">
                 <a class="nav-link py-0" data-coreui-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">

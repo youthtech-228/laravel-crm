@@ -16,12 +16,15 @@ use App\Notifications\UserAccountCreated;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laracasts\Flash\Flash;
 use Yajra\DataTables\DataTables;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class UserController extends Controller
 {
@@ -62,6 +65,7 @@ class UserController extends Controller
      */
     public function index()
     {
+        // Log::alert(json_encode(Auth::user()));
         $module_title = $this->module_title;
         $module_name = $this->module_name;
         $module_path = $this->module_path;
@@ -188,12 +192,38 @@ class UserController extends Controller
 
         $module_action = 'Create';
 
-        $roles = Role::get();
+        $currentUserId = Auth::user()->id;
+        $currentUserRole = DB::table('model_has_roles')->where('model_id', $currentUserId)->first();
+        $isClient = $currentUserRole->role_id == 3;
+        if ($isClient) {
+            $roles = Role::where('id', 4)->get();
+        } else {
+            $roles = Role::where('id', '!=', 1)->get();
+        }
+        $clients = DB::table('users')
+        ->join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+        ->where('model_has_roles.role_id', '=', 3)
+        ->orderBy('users.id', 'desc')
+        ->select('users.*', 'model_has_roles.role_id as roleId')
+        ->get();
+
         $permissions = Permission::select('name', 'id')->get();
 
         return view(
             "backend.$module_name.create",
-            compact('module_title', 'module_name', 'module_path', 'module_icon', 'module_action', 'module_name_singular', 'roles', 'permissions')
+            compact(
+                'module_title', 
+                'module_name', 
+                'module_path', 
+                'module_icon', 
+                'module_action', 
+                'module_name_singular', 
+                'roles', 
+                'permissions',
+                'isClient',
+                'currentUserId',
+                'clients'
+                )
         );
     }
 
@@ -228,6 +258,13 @@ class UserController extends Controller
             $data_array = Arr::add($data_array, 'email_verified_at', Carbon::now());
         } else {
             $data_array = Arr::add($data_array, 'email_verified_at', null);
+        }
+
+        Log::alert($data_array);
+        // if client has value, this user is created by client.
+        $client = $request['client'];
+        if (isset($client)) {
+            $data_array['client'] = $client;
         }
 
         $$module_name_singular = User::create($data_array);
@@ -576,14 +613,44 @@ class UserController extends Controller
         $userRoles = $$module_name_singular->roles->pluck('name')->all();
         $userPermissions = $$module_name_singular->permissions->pluck('name')->all();
 
-        $roles = Role::get();
+        $currentUserId = Auth::user()->id;
+        $currentUserRole = DB::table('model_has_roles')->where('model_id', $currentUserId)->first();
+        $isClient = $currentUserRole->role_id == 3;
+        if ($isClient) {
+            $roles = Role::where('id', 4)->get();
+        } else {
+            $roles = Role::where('id', '!=', 1)->get();
+        }
+
         $permissions = Permission::select('name', 'id')->get();
 
         Log::info(label_case($module_title.' '.$module_action)." | '".$$module_name_singular->name.'(ID:'.$$module_name_singular->id.") ' by User:".auth()->user()->name.'(ID:'.auth()->user()->id.')');
 
+        $clients = DB::table('users')
+        ->join('model_has_roles', 'users.id', '=', 'model_has_roles.model_id')
+        ->where('model_has_roles.role_id', '=', 3)
+        ->orderBy('users.id', 'desc')
+        ->select('users.*', 'model_has_roles.role_id as roleId')
+        ->get();
+
         return view(
             "backend.$module_name.edit",
-            compact('module_title', 'module_name', 'module_path', 'module_icon', 'module_action', 'module_name_singular', "$module_name_singular", 'roles', 'permissions', 'userRoles', 'userPermissions')
+            compact(
+                'module_title',
+                'module_name',
+                'module_path',
+                'module_icon',
+                'module_action',
+                'module_name_singular',
+                "$module_name_singular",
+                'roles',
+                'permissions',
+                'userRoles',
+                'userPermissions',
+                'currentUserId',
+                'isClient',
+                'clients',
+            )
         );
     }
 
@@ -620,7 +687,14 @@ class UserController extends Controller
 
         $$module_name_singular = User::findOrFail($id);
 
-        $$module_name_singular->update($request->except(['roles', 'permissions']));
+        $data = $request->except(['roles', 'permissions']);
+        // if client has value, this user is created by client.
+        $client = $request['client'];
+        if (isset($client)) {
+            $data['client'] = $client;
+        }
+
+        $$module_name_singular->update($data);
 
         if ($id == 1) {
             $user->syncRoles(['super admin']);
@@ -664,34 +738,48 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
-        $module_title = $this->module_title;
-        $module_name = $this->module_name;
-        $module_path = $this->module_path;
-        $module_icon = $this->module_icon;
-        $module_model = $this->module_model;
-        $module_name_singular = Str::singular($module_name);
+        try {
+            //code...
+            $module_title = $this->module_title;
+            $module_name = $this->module_name;
+            $module_path = $this->module_path;
+            $module_icon = $this->module_icon;
+            $module_model = $this->module_model;
+            $module_name_singular = Str::singular($module_name);
 
-        $module_action = 'destroy';
+            $module_action = 'destroy';
 
-        if (auth()->user()->id == $id || $id == 1) {
-            Flash::warning("<i class='fas fa-exclamation-triangle'></i> You can not delete this user!")->important();
+            if (auth()->user()->id == $id || $id == 1) {
+                Flash::warning("<i class='fas fa-exclamation-triangle'></i> You can not delete this user!")->important();
 
-            Log::notice(label_case($module_title.' '.$module_action).' Failed | User:'.auth()->user()->name.'(ID:'.auth()->user()->id.')');
+                Log::notice(label_case($module_title.' '.$module_action).' Failed | User:'.auth()->user()->name.'(ID:'.auth()->user()->id.')');
 
-            return redirect()->back();
+                return response()->json([
+                    'type' => 'error',
+                    'msg' => 'You can not delete this user!'
+                ]);
+                // return redirect()->back();
+            }
+
+            $$module_name_singular = $module_model::findOrFail($id);
+
+            $$module_name_singular->delete();
+
+            event(new UserUpdated($$module_name_singular));
+
+            flash('<i class="fas fa-check"></i> '.$$module_name_singular->name.' User Successfully Deleted!')->success();
+
+            Log::info(label_case($module_action)." '$module_name': '".$$module_name_singular->name.', ID:'.$$module_name_singular->id." ' by User:".auth()->user()->name);
+
+            return response()->json([
+                'type' => 'success',
+                'url' => 'User Successfully Deleted!'
+            ]);
+            // return redirect("admin/$module_name");
+        } catch (\Throwable $th) {
+            throw $th;
         }
-
-        $$module_name_singular = $module_model::findOrFail($id);
-
-        $$module_name_singular->delete();
-
-        event(new UserUpdated($$module_name_singular));
-
-        flash('<i class="fas fa-check"></i> '.$$module_name_singular->name.' User Successfully Deleted!')->success();
-
-        Log::info(label_case($module_action)." '$module_name': '".$$module_name_singular->name.', ID:'.$$module_name_singular->id." ' by User:".auth()->user()->name);
-
-        return redirect("admin/$module_name");
+        
     }
 
     /**
@@ -761,8 +849,7 @@ class UserController extends Controller
      * @param  int  $id  User Id
      * @return Back To Previous Page
      */
-    public function block($id)
-    {
+    public function block(Request $request, $id) {
         $module_title = $this->module_title;
         $module_name = $this->module_name;
         $module_path = $this->module_path;
@@ -791,7 +878,10 @@ class UserController extends Controller
 
             flash('<i class="fas fa-check"></i> '.$$module_name_singular->name.' User Successfully Blocked!')->success();
 
-            return redirect()->back();
+            return response()->json([
+                'type' => 'sucess',
+            ]);
+            // return redirect()->back();
         } catch (Exception $e) {
             throw new Exception('There was a problem updating this user. Please try again.');
         }

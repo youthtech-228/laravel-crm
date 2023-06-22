@@ -15,9 +15,9 @@
         <x-backend.section-header>
             <i class="{{ $module_icon }}"></i> {{ __($module_title) }} <small class="text-muted">{{ __($module_action) }}</small>
 
-            <x-slot name="subtitle">
+            {{-- <x-slot name="subtitle">
                 @lang(":module_name Management Dashboard", ['module_name'=>Str::title($module_name)])
-            </x-slot>
+            </x-slot> --}}
             <x-slot name="toolbar">
                 <x-backend.buttons.return-back />
                 <a href='{{ route("backend.$module_name.index") }}' class="btn btn-secondary" data-toggle="tooltip" title="{{ ucwords($module_name) }} List"><i class="fas fa-list"></i> List</a>
@@ -85,6 +85,23 @@
                 <div class="float-end">
                     {!! $$module_name->render() !!}
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="userRestoreModal" tabindex="-1" aria-labelledby="userRestoreModalTitle" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userRestoreModalTitle">Attention!</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalBodyText">
+                Are you sure you want to restore the current user?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmUserRestore">Confirm</button>
             </div>
         </div>
     </div>

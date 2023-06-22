@@ -18,12 +18,12 @@
         <x-backend.section-header>
             <i class="{{ $module_icon }}"></i> {{ __($module_title) }} <small class="text-muted">{{ __($module_action) }}</small>
 
-            <x-slot name="subtitle">
+            {{-- <x-slot name="subtitle">
                 @lang(":module_name Management Dashboard", ['module_name'=>Str::title($module_name)])
-            </x-slot>
-            <x-slot name="toolbar">
+            </x-slot> --}}
+            {{-- <x-slot name="toolbar">
                 <x-backend.buttons.return-back />
-            </x-slot>
+            </x-slot> --}}
         </x-backend.section-header>
 
         <hr>
@@ -31,7 +31,7 @@
         <div class="row mt-4">
             <div class="col">
 
-                {{ html()->form('POST', route('backend.users.store'))->class('form-horizontal')->open() }}
+                {{ html()->form('POST', route('backend.users.store'))->class('form-horizontal user-create-form')->open() }}
                 {{ csrf_field() }}
 
                 <div class="form-group row  mb-3">
@@ -114,12 +114,57 @@
                     </div>
                 </div>
 
+                @if($isClient)
                 <div class="form-group row  mb-3">
-                    {{ html()->label('Abilities')->class('col-sm-2 form-control-label') }}
-
+                    {{ html()->label('Role')->class('col-sm-2 form-control-label') }}
+                    <input class="form-control" type="hidden" name="client" id="client" value="{{$currentUserId}}" />
                     <div class="col">
                         <div class="row  mb-3">
-                            <div class="col-12 col-sm-7">
+                            <div class="col-12 col-sm-12">
+                                @if ($roles->count())
+                                @foreach($roles as $role)
+                                <div class="card mb-3">
+                                    <div class="card-header">
+                                        <div class="radio">
+                                            {{-- {{ html()->label(html()->radio('roles[]', old('roles') && in_array($role->name, old('roles')) ? true : false, $role->name)->id('role-'.$role->id) . "&nbsp;" . ucwords($role->name). "&nbsp;(".$role->name.")")->for('role-'.$role->id) }} --}}
+                                            <label for="role-{{$role->id}}">
+                                                <input type="radio" name="roles[]" id="role-{{$role->id}}" value="{{$role->name}}" @if($role->id == 4) checked="checked" @endif />&nbsp;{{ucwords($role->name)}}
+                                            </label>
+                                        </div>
+                                        {{-- <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="roles[]" id="role-{{$role->id}}" checked>
+                                            <label class="form-check-label" for="flexRadioDefault2">
+                                                Default checked radio
+                                            </label>
+                                        </div> --}}
+                                    </div>
+                                    <div class="card-body">
+                                        @if ($role->id != 1)
+                                        @if ($role->permissions->count())
+                                        @foreach ($role->permissions as $permission)
+                                        <i class="far fa-check-circle mr-1"></i>&nbsp;{{ $permission->name }}&nbsp;
+                                        @endforeach
+                                        @else
+                                        @lang('None')
+                                        @endif
+                                        @else
+                                        @lang('All Permissions')
+                                        @endif
+                                    </div>
+                                </div>
+                                <!--card-->
+                                @endforeach
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                @else
+                <div class="form-group row  mb-3">
+                    {{ html()->label('Role')->class('col-sm-2 form-control-label') }}
+                    <div class="col">
+                        <div class="row  mb-3">
+                            <div class="col-12 col-sm-12">
                                 <div class="card card-accent-info">
                                     <div class="card-header">
                                         @lang('Roles')
@@ -129,8 +174,11 @@
                                         @foreach($roles as $role)
                                         <div class="card mb-3">
                                             <div class="card-header">
-                                                <div class="checkbox">
-                                                    {{ html()->label(html()->checkbox('roles[]', old('roles') && in_array($role->name, old('roles')) ? true : false, $role->name)->id('role-'.$role->id) . "&nbsp;" . ucwords($role->name). "&nbsp;(".$role->name.")")->for('role-'.$role->id) }}
+                                                <div class="radio">
+                                                    {{-- {{ html()->label(html()->radio('roles[]', old('roles') && in_array($role->name, old('roles')) ? true : false, $role->name)->id('role-'.$role->id) . "&nbsp;" . ucwords($role->name). "&nbsp;(".$role->name.")")->for('role-'.$role->id) }} --}}
+                                                    <label for="role-{{$role->id}}">
+                                                        <input type="radio" name="roles[]" id="role-{{$role->id}}" value="{{$role->name}}" @if($role->id == 4) checked="checked" @endif />&nbsp;{{ucwords($role->name)}}
+                                                    </label>
                                                 </div>
                                             </div>
                                             <div class="card-body">
@@ -145,6 +193,17 @@
                                                 @else
                                                 @lang('All Permissions')
                                                 @endif
+                                                @if ($role->id == 4 && $clients->count())
+                                                <div>
+                                                    <hr />
+                                                    <select class="form-select client-select my-1" aria-label="Clients" name="client">
+                                                        <option selected disabled>Select a client to attach this user</option>
+                                                        @foreach ($clients as $client)
+                                                        <option value="{{$client->id}}">{{$client->name}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                                @endif
                                             </div>
                                         </div>
                                         <!--card-->
@@ -153,7 +212,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-sm-5">
+                            {{-- <div class="col-12 col-sm-5">
                                 <div class="card card-accent-primary">
                                     <div class="card-header">
                                         @lang('Permissions')
@@ -168,25 +227,20 @@
                                         @endif
                                     </div>
                                 </div>
-                            </div>
+                            </div> --}}
                         </div>
                     </div>
                 </div>
+                @endif
                 <!--form-group-->
 
                 <div class="row  mb-3">
-                    <div class="col-6">
-                        <div class="form-group">
-                            <x-buttons.create title="{{__('Create')}} {{ ucwords(Str::singular($module_name)) }}">
-                                {{__('Create')}}
-                            </x-buttons.create>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="float-end">
-                            <div class="form-group">
-                                <x-buttons.cancel />
-                            </div>
+                    <div class="col-12 d-flex align-items-end justify-content-end">
+                        <button type="submit" class="btn btn-primary" id="btn-submit" data-toggle="tooltip" title="{{__('Create')}} {{ ucwords(Str::singular($module_name)) }}">
+                            <i class="fas fa-plus-circle"></i>
+                            {{__('Create')}}
+                        </button>
+                        <x-buttons.cancel>{{__('Cancel')}}</x-buttons.cancel>
                         </div>
                     </div>
                 </div>
@@ -207,5 +261,34 @@
         </div>
     </div>
 </div>
+
+<script>
+    $(document).ready(function(){
+        
+        const CLIENT_MISSING_ERR_MSG = 'When you select the user role, you should select a Client to attach';
+        $('.client-select').change(function(e) {
+            console.log(e);
+        });
+        $('#btn-submit').click(function(e) {
+            e.preventDefault();
+            let isValid = true;
+            
+            let formData = $('.user-create-form').serializeArray();
+            let isClientSelected = formData.find((item) => item.name === 'client');
+            formData.map(function(item, index) {
+                if (item.name === 'roles[]' && item.value === 'user' && !isClientSelected) {
+                    isValid = false;
+                    showToast('error', CLIENT_MISSING_ERR_MSG);
+                }
+                // console.log(item.name, item.value);
+            })
+            console.log(formData);
+            if (!isValid) {
+                return;
+            }
+            $(".user-create-form").submit();
+        });
+    });
+</script>
 
 @endsection
